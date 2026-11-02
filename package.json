@@ -1,7 +1,11 @@
 {
   "name": "@captiveorigins/payload-plugin-menu",
   "version": "0.1.0",
-  "description": "Menus for Payload: drag-and-drop links, dropdowns and section headings, optional icons or emoji on every entry, alphabetical order for the whole menu or per dropdown (in each visitor's language), and visibility by sign-in or your own conditions. Works with @payloadcms/plugin-multi-tenant.",
+  "description": "Menus for Payload: drag-and-drop links, dropdowns and section headings, optional icons or emoji, alphabetical order in each visitor’s language, and visibility per entry.",
+  "homepage": "https://github.com/mgilardi/payload-plugin-menu#readme",
+  "bugs": {
+    "url": "https://github.com/mgilardi/payload-plugin-menu/issues"
+  },
   "keywords": [
     "payload",
     "payload-plugin",
