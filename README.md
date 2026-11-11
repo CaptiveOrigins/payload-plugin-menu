@@ -49,4 +49,14 @@ The plugin stores data and nothing more; markup is up to you. For accessible men
 - Mark icons and emoji `aria-hidden="true"`. An entry shown only as an icon needs a visually hidden label.
 - Set `aria-current="page"` on the link to the current page.
 
+## On its own, and with others
+
+**On its own.** Menu needs only Payload. Menus live in its own collection (`menus`), link targets come from your routes and collections, and your site renders the result of `resolveMenu()` with its own markup. It doesn't use any other Captive Origins plugin.
+
+**Works with:**
+
+- **Multi-tenant** (`@payloadcms/plugin-multi-tenant`): add the `menus` collection to its list, and each site gets its own menus.
+
+**Family.** Menu is in the Navigation family, with Nested Docs Browser. They're meant to sit side by side in a site's navigation, but nothing in either plugin's code connects them yet. The families are a working draft that may change.
+
 MIT © Captive Origins
