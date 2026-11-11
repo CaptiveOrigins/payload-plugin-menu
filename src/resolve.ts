@@ -22,6 +22,22 @@ const visible = (e: { audience?: string | null; when?: string[] | null }, o: Res
   return [...(e.when ?? []), ...extra].every((c) => o.conditions?.[c] === true)
 }
 
+/**
+ * Only links a browser follows as a page: a path on this site (not `//host`), a fragment or a query, or an absolute
+ * http, https, mailto or tel address. Anything else, such as `javascript:` or `data:`, is dropped (fail closed).
+ */
+export const safeHref = (href: string): string | null => {
+  const h = href.trim()
+  if (!h || /[\u0000-\u001f\u007f]/.test(h)) return null
+  if (h.startsWith('#') || h.startsWith('?')) return h
+  if (h.startsWith('/')) return h.startsWith('//') || h.startsWith('/\\') ? null : h
+  try {
+    return ['http:', 'https:', 'mailto:', 'tel:'].includes(new URL(h).protocol) ? h : null
+  } catch {
+    return null
+  }
+}
+
 const target = (e: StoredLink & { label?: string | null }, o: ResolveOptions): { href: string; label: string; when: string[] } | null => {
   const own = e.label?.trim() || ''
   if (e.linkType === 'route' || (!e.linkType && e.route)) {
@@ -33,12 +49,17 @@ const target = (e: StoredLink & { label?: string | null }, o: ResolveOptions): {
     const doc = e.doc?.value
     if (!doc || typeof doc !== 'object') return null // not readable (e.g. unpublished) or not populated
     const d = doc as Record<string, unknown>
-    const href = o.docHref?.(d, e.doc!.relationTo) ?? (typeof d.path === 'string' ? d.path : typeof d.slug === 'string' ? `/${d.slug}` : null)
+    // With docHref, its answer stands: null or undefined drops the link (unpublished, say), never a fallback.
+    const raw = o.docHref ? o.docHref(d, e.doc!.relationTo) : typeof d.path === 'string' ? d.path : typeof d.slug === 'string' ? `/${d.slug}` : null
+    const href = raw ? safeHref(raw) : null
     if (!href) return null
     const title = o.docLabel?.(d, e.doc!.relationTo) ?? (typeof d.title === 'string' ? d.title : typeof d.name === 'string' ? d.name : '')
     return { href, label: own || title, when: [] }
   }
-  if (e.linkType === 'url' && e.url?.trim()) return { href: e.url.trim(), label: own || e.url.trim(), when: [] }
+  if (e.linkType === 'url' && e.url?.trim()) {
+    const href = safeHref(e.url)
+    return href ? { href, label: own || href, when: [] } : null
+  }
   return null
 }
 

@@ -187,3 +187,21 @@ describe('menuPlugin: options', () => {
     expect(field(c.fields, 'label')!.localized).toBe(true)
   })
 })
+
+describe('resolveMenu: from the first test audit', () => {
+  it('drops a document link when docHref says there is no URL, instead of guessing one', () => {
+    const m: StoredMenu = { items: [{ linkType: 'doc', doc: { relationTo: 'pages', value: { title: 'Draft', slug: 'draft', path: '/draft' } } }] }
+    expect(resolveMenu(m, { routes, docHref: () => null }).items).toEqual([])
+    expect(resolveMenu(m, { routes, docHref: () => undefined }).items).toEqual([])
+    expect(resolveMenu(m, { routes, docHref: (d) => String(d.path) }).items).toHaveLength(1)
+  })
+
+  it('drops links a browser would run or send off-site by trickery, and keeps ordinary ones', () => {
+    const bad = ['javascript:alert(1)', ' JavaScript:alert(1)', 'data:text/html,x', 'vbscript:x', '//evil.example', '/\\evil.example', 'java\tscript:x', 'not a url']
+    const good = ['/about', '#top', '?q=1', 'https://example.org/a', 'http://example.org', 'mailto:hello@example.org', 'tel:+15555550100']
+    const m: StoredMenu = { items: [...bad, ...good].map((url) => ({ linkType: 'url' as const, url })) }
+    expect(resolveMenu(m, { routes }).items.map((i) => (i as { href: string }).href)).toEqual(good)
+    const doc: StoredMenu = { items: [{ linkType: 'doc', doc: { relationTo: 'pages', value: { title: 'X' } } }] }
+    expect(resolveMenu(doc, { routes, docHref: () => 'javascript:alert(1)' }).items).toEqual([])
+  })
+})

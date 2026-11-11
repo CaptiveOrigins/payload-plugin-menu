@@ -2,6 +2,12 @@
 
 Kept by this repo's owning session, per `~/Code/CLAUDE.md`, "Test self-audits". Newest first.
 
+## 2026-11-10: the lead's fixes after the first audit
+
+- The bug the audit found (`src/resolve.ts`, `docHref` returning null fell back to `path` or `slug`) is fixed: with `docHref`, its answer stands. Test: `drops a document link when docHref says there is no URL`.
+- URL and document links are limited to safe schemes (`safeHref`), so an editor's `javascript:` link never reaches a page. Test: `drops links a browser would run…`.
+- 15 tests. Mutations of both fixes fail the tests.
+
 ## 2026-11-10: first audit
 
 Suite before: 5 tests. After: 13. Sources: the README, the option docs in `src/plugin.ts` and `src/resolve.ts`, and `src/types.ts`. There is no `docs/decisions.md`.

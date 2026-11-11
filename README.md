@@ -7,7 +7,7 @@ Menus for [Payload](https://payloadcms.com) 3 that stay simple for editors:
 - **Optional icon or emoji on every entry**: dropdowns, links and headings. Top-level icons can be hidden, shown, or shown on small screens only, in place of the label.
 - **Alphabetical order** for the whole menu, or per dropdown, within each section. Sorting happens when the menu is rendered, in the visitor's language, so translated labels sort correctly.
 - **Who sees it**: everyone, signed-in or signed-out people, plus conditions your site evaluates (e.g. "staff", "shop open").
-- **Link targets**: named pages of your app (`routes`), documents from your collections, or URLs.
+- **Link targets**: named pages of your app (`routes`), documents from your collections, or URLs. Only links a browser opens as a page are kept: paths on your site, `#` and `?` links, and http, https, mailto and tel addresses. Anything else (`javascript:`, `data:`, `//other-host`) is dropped. With `docHref`, a document whose `docHref` gives no URL (an unpublished page, say) isn't shown.
 - Works with `@payloadcms/plugin-multi-tenant`: add the collection to its list and each site gets its own menus.
 
 ```ts
