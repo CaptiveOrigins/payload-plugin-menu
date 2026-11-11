@@ -84,3 +84,106 @@ describe('menuPlugin', () => {
     for (const s of ['"route"', '"doc"', '"when"', '"children"', '"sortAll"', '"topLevelIcons"', '"icon"']) expect(json).toContain(s)
   })
 })
+
+describe('resolveMenu: visibility fails closed', () => {
+  it('treats unknown or missing conditions as false, for entries, children and dropdowns', () => {
+    const m: StoredMenu = {
+      items: [
+        { route: 'taxa', when: ['neverSet'] },
+        { type: 'dropdown', label: 'Staff', when: ['staff'], children: [{ route: 'climate' }] },
+        { type: 'dropdown', label: 'Learn', children: [{ route: 'climate', when: ['staff'] }, { route: 'library' }] },
+      ],
+    }
+    const out = resolveMenu(m, { routes })
+    expect(out.items.map((i) => i.label)).toEqual(['Learn'])
+    expect(out.items[0]?.kind === 'dropdown' && out.items[0].items.map((c) => c.label)).toEqual(['Library'])
+    // A condition that is present but not exactly true still hides the entry.
+    expect(resolveMenu(m, { routes, conditions: { neverSet: 1 as never } }).items.map((i) => i.label)).toEqual(['Learn'])
+  })
+
+  it('hides signed-out entries from signed-in people, and a hidden dropdown hides its children', () => {
+    const m: StoredMenu = {
+      items: [
+        { route: 'library', audience: 'signedOut', label: 'Sign up' },
+        { type: 'dropdown', label: 'Account', audience: 'signedIn', children: [{ route: 'orders' }] },
+      ],
+    }
+    expect(resolveMenu(m, { routes, signedIn: true }).items.map((i) => i.label)).toEqual(['Account'])
+    expect(resolveMenu(m, { routes, signedIn: false }).items.map((i) => i.label)).toEqual(['Sign up'])
+    expect(resolveMenu(m, { routes }).items.map((i) => i.label)).toEqual(['Sign up'])
+  })
+
+  it('keeps a route’s own conditions even when the entry sets none', () => {
+    const m: StoredMenu = { items: [{ route: 'shop', audience: 'everyone', when: [] }] }
+    expect(resolveMenu(m, { routes, conditions: { staff: true } }).items).toEqual([])
+    expect(resolveMenu(m, { routes, conditions: { shopOpen: true } }).items.map((i) => i.label)).toEqual(['Shop'])
+  })
+})
+
+describe('resolveMenu: link targets', () => {
+  it('drops unknown routes, empty URLs and documents without an href', () => {
+    const m: StoredMenu = {
+      items: [
+        { route: 'gone' },
+        { linkType: 'url', url: '   ' },
+        { linkType: 'doc', doc: { relationTo: 'pages', value: { title: 'No path' } } },
+        { linkType: 'doc', doc: { relationTo: 'pages', value: { name: 'About', slug: 'about' } } },
+        { linkType: 'url', url: ' https://example.org/a ', newTab: true },
+      ],
+    }
+    const out = resolveMenu(m, { routes })
+    expect(out.items).toEqual([
+      { kind: 'link', id: '3', label: 'About', href: '/about', icon: null, newTab: false, appearance: 'link' },
+      { kind: 'link', id: '4', label: 'https://example.org/a', href: 'https://example.org/a', icon: null, newTab: true, appearance: 'link' },
+    ])
+  })
+
+  it('drops dropdowns without a label or without any visible link, and handles a missing menu', () => {
+    const m: StoredMenu = {
+      items: [
+        { type: 'dropdown', label: '  ', children: [{ route: 'taxa' }] },
+        { type: 'dropdown', label: 'Only headings', children: [{ type: 'heading', label: 'A' }, { route: 'admin', when: ['staff'] }] },
+      ],
+    }
+    expect(resolveMenu(m, { routes }).items).toEqual([])
+    expect(resolveMenu(null)).toEqual({ topLevelIcons: 'hide', items: [] })
+  })
+})
+
+describe('menuPlugin: options', () => {
+  const field = (fields: unknown[], name: string): Record<string, any> | undefined => { // eslint-disable-line @typescript-eslint/no-explicit-any
+    for (const f of fields as Record<string, any>[]) { // eslint-disable-line @typescript-eslint/no-explicit-any
+      if (f.name === name) return f
+      const inner = f.fields && field(f.fields, name)
+      if (inner) return inner
+    }
+    return undefined
+  }
+
+  it('reads publicly and passes the site’s write access through unchanged', () => {
+    const isAdmin = () => false
+    const c = menuPlugin({ access: { create: isAdmin, update: isAdmin, delete: isAdmin } })({ collections: [] } as never).collections![0]!
+    expect((c.access!.read as () => boolean)()).toBe(true)
+    expect(c.access).toMatchObject({ create: isAdmin, update: isAdmin, delete: isAdmin })
+    const locked = menuPlugin({ access: { read: isAdmin } })({ collections: [] } as never).collections![0]!
+    expect(locked.access!.read).toBe(isAdmin)
+  })
+
+  it('requires labels on dropdowns and headings only', () => {
+    const c = menuPlugin({ routes })({ collections: [] } as never).collections![0]!
+    const validate = field(c.fields, 'label')!.validate as (v: unknown, a: { siblingData: Record<string, unknown> }) => true | string
+    expect(validate('', { siblingData: { type: 'dropdown' } })).toMatch(/label is needed/)
+    expect(validate('  ', { siblingData: { type: 'heading' } })).toMatch(/label is needed/)
+    expect(validate('', { siblingData: { type: 'link' } })).toBe(true)
+    expect(validate('Learn', { siblingData: { type: 'dropdown' } })).toBe(true)
+  })
+
+  it('localizes labels when the site is localized, and applies slug, group and overrides', () => {
+    const plain = menuPlugin()({ collections: [] } as never).collections![0]!
+    expect(field(plain.fields, 'label')!.localized).toBe(false)
+    const c = menuPlugin({ slug: 'navs', group: 'Layout', overrides: (x) => ({ ...x, admin: { ...x.admin, hidden: true } }) })({ collections: [], localization: { locales: ['en', 'de'], defaultLocale: 'en' } } as never).collections![0]!
+    expect(c.slug).toBe('navs')
+    expect(c.admin).toMatchObject({ group: 'Layout', hidden: true })
+    expect(field(c.fields, 'label')!.localized).toBe(true)
+  })
+})
