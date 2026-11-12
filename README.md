@@ -59,4 +59,4 @@ The plugin stores data and nothing more; markup is up to you. For accessible men
 
 **Family.** Menu is in the Navigation family, with Nested Docs Browser. They're meant to sit side by side in a site's navigation, but nothing in either plugin's code connects them yet. The families are a working draft that may change.
 
-MIT © Captive Origins
+MIT © EXTANT APE
