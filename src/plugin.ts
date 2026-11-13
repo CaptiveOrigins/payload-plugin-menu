@@ -26,7 +26,7 @@ export type MenuPluginOptions = {
 
 type Sibling = Record<string, unknown>
 const isLink = (_: unknown, s: Sibling) => s?.type !== 'dropdown' && s?.type !== 'heading'
-const ROW_LABEL = '@captiveorigins/payload-plugin-menu/client#MenuRowLabel'
+const ROW_LABEL = '@extantape/payload-plugin-menu/client#MenuRowLabel'
 
 /**
  * Menus for Payload: drag-and-drop entries (links, dropdowns, section headings

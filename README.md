@@ -1,4 +1,4 @@
-# @captiveorigins/payload-plugin-menu
+# @extantape/payload-plugin-menu
 
 Menus for [Payload](https://payloadcms.com) 3 that stay simple for editors:
 
@@ -11,7 +11,7 @@ Menus for [Payload](https://payloadcms.com) 3 that stay simple for editors:
 - Works with `@payloadcms/plugin-multi-tenant`: add the collection to its list and each site gets its own menus.
 
 ```ts
-import { menuPlugin } from '@captiveorigins/payload-plugin-menu'
+import { menuPlugin } from '@extantape/payload-plugin-menu'
 
 plugins: [
   menuPlugin({
@@ -29,7 +29,7 @@ plugins: [
 Render it with `resolveMenu()`. It drops entries the visitor shouldn't see, fills in labels and hrefs, sorts where asked, and removes empty dropdowns and headings:
 
 ```ts
-import { resolveMenu } from '@captiveorigins/payload-plugin-menu'
+import { resolveMenu } from '@extantape/payload-plugin-menu'
 
 const menu = await payload.find({ collection: 'menus', where: { location: { equals: 'header' } }, depth: 1 })
 const resolved = resolveMenu(menu.docs[0], {

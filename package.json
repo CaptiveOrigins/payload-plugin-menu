@@ -1,10 +1,10 @@
 {
-  "name": "@captiveorigins/payload-plugin-menu",
+  "name": "@extantape/payload-plugin-menu",
   "version": "0.1.1",
   "description": "Menus for Payload: drag-and-drop links, dropdowns and section headings, optional icons or emoji, alphabetical order in each visitor’s language, and visibility per entry.",
-  "homepage": "https://github.com/CaptiveOrigins/payload-plugin-menu#readme",
+  "homepage": "https://github.com/ExtantApe/payload-plugin-menu#readme",
   "bugs": {
-    "url": "https://github.com/CaptiveOrigins/payload-plugin-menu/issues"
+    "url": "https://github.com/ExtantApe/payload-plugin-menu/issues"
   },
   "keywords": [
     "payload",
@@ -19,7 +19,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/CaptiveOrigins/payload-plugin-menu.git"
+    "url": "git+https://github.com/ExtantApe/payload-plugin-menu.git"
   },
   "type": "module",
   "exports": {
