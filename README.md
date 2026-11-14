@@ -51,7 +51,7 @@ The plugin stores data and nothing more; markup is up to you. For accessible men
 
 ## On its own, and with others
 
-**On its own.** Menu needs only Payload. Menus live in its own collection (`menus`), link targets come from your routes and collections, and your site renders the result of `resolveMenu()` with its own markup. It doesn't use any other Captive Origins plugin.
+**On its own.** Menu needs only Payload. Menus live in its own collection (`menus`), link targets come from your routes and collections, and your site renders the result of `resolveMenu()` with its own markup. It doesn't use any other plugin.
 
 **Works with:**
 
